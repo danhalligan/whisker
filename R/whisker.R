@@ -13,6 +13,10 @@
 #' @rdname whisker.render
 #' @example examples/whisker_render.R
 #' @export
+#' @note 
+#' By default whisker applies html escaping on the generated text. 
+#' To prevent this use \{\{\{variable\}\}\} (triple) in stead of 
+#' \{\{variable\}\}.
 whisker.render <- function( template
                           , data = parent.frame()
                           , partials = list()
@@ -21,7 +25,7 @@ whisker.render <- function( template
                           , checkvars = FALSE
                           , escapeHTML = TRUE
                           ){
-   if (is.null(template) || paste(template, collapse="") == ""){
+   if (is.null(template) || identical(paste(template, collapse=""), "")){
      return("")
    }
    
