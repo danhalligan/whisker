@@ -17,7 +17,8 @@ keytypes <- c("", "{}", "&", "#", "^", "/", ">")
 # current parsing code is not a clean parsing state machine!
 # This is partly due to that this would be clumsy in R, 
 # It's on my list to do the parsing in C (would be significantly faster)
-parseTemplate <- function(template, partials=new.env(), debug=FALSE, strict=TRUE){
+parseTemplate <- function(template, partials=new.env(), debug=FALSE, strict=TRUE, 
+  checkvars=FALSE, escapeHTML=TRUE){
   #TODO add delimiter switching
 
   delim <- tag2delim()
@@ -41,7 +42,11 @@ parseTemplate <- function(template, partials=new.env(), debug=FALSE, strict=TRUE
   
   render <- list()
   #default rendering method
-  render[1:n] <- list(renderHTML)  
+  if (escapeHTML) {
+    render[1:n] <- list(renderHTML) 
+  } else {
+    render[1:n] <- list(renderText) 
+  }
   #literal rendering
   literal <- key$type %in% c("{}", "&")
   render[literal] <- list(renderText)
@@ -76,6 +81,7 @@ parseTemplate <- function(template, partials=new.env(), debug=FALSE, strict=TRUE
        render[h] <- list(renderFUN( text[idx]
                                   , key$key[kidx]
                                   , render[kidx]
+                                  , checkvars=checkvars
                                   ) 
                         )
        } else if (type == ">"){
@@ -100,7 +106,9 @@ parseTemplate <- function(template, partials=new.env(), debug=FALSE, strict=TRUE
                   , context=context
                   , texts=texts
                   , renders=renders
+                  , keys=keys
                   , debug=debug
+                  , checkvars=checkvars
                   )
   }
   

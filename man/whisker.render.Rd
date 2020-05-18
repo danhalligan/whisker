@@ -5,7 +5,8 @@
 \title{Logicless templating}
 \usage{
 whisker.render(template, data = parent.frame(), partials = list(),
-  debug = FALSE, strict = TRUE)
+  debug = FALSE, strict = TRUE, checkvars = FALSE,
+  escapeHTML = TRUE)
 }
 \arguments{
 \item{template}{\code{character} with template text}
@@ -16,7 +17,13 @@ whisker.render(template, data = parent.frame(), partials = list(),
 
 \item{debug}{Used for debugging purposes, likely to disappear}
 
-\item{strict}{\code{logical} if \code{TRUE} the seperation symbol is a "." otherwise a "$"}
+\item{strict}{\code{logical} if \code{TRUE} the separation symbol is a "." otherwise a "$"}
+
+\item{checkvars}{\code{logical} if \code{TRUE} \code{whisker.render} will
+generate warnings when values are not present in \code{data}.}
+
+\item{escapeHTML}{\code{logical} if \code{TRUE} \code{whisker.render} will
+escape  HTML characters (&, <, >, ").}
 }
 \value{
 \code{character} with rendered template

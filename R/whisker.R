@@ -4,7 +4,11 @@
 #' @param data named \code{list} or \code{environment} with variables that will be used during rendering
 #' @param partials named \code{list} with partial templates, will be used during template construction
 #' @param debug Used for debugging purposes, likely to disappear
-#' @param strict \code{logical} if \code{TRUE} the seperation symbol is a "." otherwise a "$"
+#' @param strict \code{logical} if \code{TRUE} the separation symbol is a "." otherwise a "$"
+#' @param checkvars \code{logical} if \code{TRUE} \code{whisker.render} will
+#' generate warnings when values are not present in \code{data}.
+#' @param escapeHTML \code{logical} if \code{TRUE} \code{whisker.render} will
+#' escape  HTML characters (&, <, >, ").
 #' @return \code{character} with rendered template
 #' @rdname whisker.render
 #' @example examples/whisker_render.R
@@ -18,15 +22,19 @@ whisker.render <- function( template
                           , partials = list()
                           , debug = FALSE
                           , strict = TRUE
+                          , checkvars = FALSE
+                          , escapeHTML = TRUE
                           ){
    if (is.null(template) || identical(paste(template, collapse=""), "")){
      return("")
    }
    
    tmpl <- parseTemplate( template
-                        , partials=as.environment(partials)
-                        , debug=debug
-                        , strict=strict
+                        , partials = as.environment(partials)
+                        , debug = debug
+                        , strict = strict
+                        , checkvars = checkvars
+                        , escapeHTML = escapeHTML
                         )
    
    return(tmpl(data))
@@ -71,8 +79,17 @@ renderEmpty <- function(x, context){
   ""
 }
 
-renderTemplate <- function(values, context, texts, renders, debug=FALSE){
+renderTemplate <- function(values, context, texts, renders, keys, debug=FALSE,
+  checkvars=FALSE){
    
+   # check variables, but avoid situation when keys is a character vector of 
+   # length 1 with an empty string (no keys available)
+   if (checkvars && !(length(keys) == 1 && keys[1] == "") && length(values) > 1){
+     for (v in which(sapply(values, is.null))){
+       warning("Missing '", keys[v],"'")
+     }
+   }
+
    s <- mapply(values, renders, FUN=function(value, render){
      render(value, context)
    })
